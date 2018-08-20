@@ -1,1 +1,1 @@
-# react-native-orm-sqlite
+# react-native-norm-sqlite

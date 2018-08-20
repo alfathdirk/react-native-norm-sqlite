@@ -1,5 +1,6 @@
-// const Connection = require('node-norm/connection');
-// const sqlite = require('react-native-sqlite-storage');
+const Connection = require('node-norm/connection');
+const SQLite = require('react-native-sqlite-storage');
+SQLite.enablePromise(true);
 
 const OPERATORS = {
   'eq': '=',
@@ -10,12 +11,27 @@ const OPERATORS = {
   'like' : 'like',
 };
 
-class Sqlite  {
+class Sqlite extends Connection{
   constructor (options) {
-    super(options);
+    super(options)
+    this.options = options;
+    this.openDB = SQLite.openDatabase(`${options.name}.db`, '1.0', options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error',error));
+  }
 
-    // this._db = options.db;
-    // this.file = options.file || ':memory:';
+  async all (query, params = []) {
+    let results = [];
+    let db = await this.openDB;
+    await db.transaction(async (tx) => {
+      let [ txs, r ] = await tx.executeSql(query, params);
+      for (let i = 0; i < r.rows.length; i++) {
+        results.push(r.rows.item(i));
+      }
+    })
+    return results;
+  }
+
+  async run (query, params = []) {
+    return await this.all(query, params);
   }
 
   async insert (query, callback = () => {}) {
@@ -34,12 +50,12 @@ class Sqlite  {
     let placeholder = fieldNames.map(f => '?');
     let sql = `INSERT INTO ${query.schema.name} (${fieldNames.join(',')}) VALUES (${placeholder})`;
 
-    let db = await this.getDb();
+    // let db = await this.getDb();
 
     let changes = 0;
     await Promise.all(query._inserts.map(async row => {
       let rowData = fieldNames.map(f => row[f]);
-      let result = await db.run(sql, rowData);
+      let result = await this.run(sql, rowData);
       row.id = result.lastID;
       callback(row);
       changes += result.changes;
@@ -70,9 +86,7 @@ class Sqlite  {
 
     let sql = sqlArr.join(' ');
 
-    let db = await this.getDb();
-
-    let results = await db.all(sql, data);
+    let results = await this.all(sql, data);
 
     return results.map(row => {
       callback(row);
@@ -88,10 +102,8 @@ class Sqlite  {
     }
 
     let sql = sqlArr.join(' ');
-
-    let db = await this.getDb();
-
-    let results = await db.all(sql, data);
+    // let db = await this.getDb();
+    let results = await this.all(sql, data);
 
     return results.map(row => {
       callback(row);
@@ -109,7 +121,7 @@ class Sqlite  {
     let sql = sqlArr.join(' ');
 
     let db = await this.getDb();
-    await db.run(sql, data);
+    await this.run(sql, data);
   }
 
   getOrderBy (query) {
@@ -131,14 +143,13 @@ class Sqlite  {
     let keys = Object.keys(query._sets);
 
     let db = await this.getDb();
-    // let db = await sqlite.open(this.file);
 
     let params = keys.map(k => query._sets[k]);
     let placeholder = keys.map(k => `${k} = ?`);
 
     let [ wheres, data ] = this.getWhere(query);
     let sql = `UPDATE ${query.schema.name} SET ${placeholder.join(', ')} ${wheres}`;
-    let result = await db.run(sql, params.concat(data));
+    let result = await this.run(sql, params.concat(data));
 
     return result.changes;
   }
@@ -190,10 +201,10 @@ class Sqlite  {
   }
 
   async getDb () {
-    if (!this._db) {
-      this._db = await sqlite.openDatabase(this.file);
+    if (!this.openDB) {
+      this.openDB = SQLite.openDatabase(`${this.options.name}.db`, '1.0', this.options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error',error));
     }
-    return this._db;
+    return this.openDB;
   }
 }
 

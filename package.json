@@ -1,0 +1,22 @@
+{
+  "name": "react-native-norm-sqlite",
+  "version": "1.0.0",
+  "description": "node norm react native sqlite",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alfathdirk[at]gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^8.2.2",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-config-xinix": "^1.0.4",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "node-norm": "^0.6.2"
+  }
+}

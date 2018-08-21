@@ -8,14 +8,14 @@ const OPERATORS = {
   'lt': '<',
   'gte': '>=',
   'lte': '<=',
-  'like' : 'like',
+  'like': 'like',
 };
 
-class Sqlite extends Connection{
+class Sqlite extends Connection {
   constructor (options) {
-    super(options)
+    super(options);
     this.options = options;
-    this.openDB = SQLite.openDatabase(`${options.name}.db`, '1.0', options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error',error));
+    this.openDB = SQLite.openDatabase(`${options.name}.db`, '1.0', options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error', error));
   }
 
   async all (query, params = []) {
@@ -26,12 +26,12 @@ class Sqlite extends Connection{
       for (let i = 0; i < r.rows.length; i++) {
         results.push(r.rows.item(i));
       }
-    })
+    });
     return results;
   }
 
-  async run (query, params = []) {
-    return await this.all(query, params);
+  run (query, params = []) {
+    return this.all(query, params);
   }
 
   async insert (query, callback = () => {}) {
@@ -117,10 +117,7 @@ class Sqlite extends Connection{
     if (wheres) {
       sqlArr.push(wheres);
     }
-
     let sql = sqlArr.join(' ');
-
-    let db = await this.getDb();
     await this.run(sql, data);
   }
 
@@ -159,7 +156,7 @@ class Sqlite extends Connection{
     let data = [];
     for (let key in query._criteria) {
       let value = query._criteria[key];
-      if(key === '!or'){
+      if (key === '!or') {
         let or = this.getOr(value);
         wheres.push(or.where);
         data = data.concat(or.data);
@@ -168,8 +165,8 @@ class Sqlite extends Connection{
       let [ field, operator = 'eq' ] = key.split('!');
 
       // add by januar: for chek if operator like value change to %
-      if(operator == 'like'){
-        value ='%'+value +'%';
+      if (operator == 'like') {
+        value = '%' + value + '%';
       }
 
       data.push(value);
@@ -184,25 +181,25 @@ class Sqlite extends Connection{
     return [ `WHERE ${wheres.join(' AND ')}`, data ];
   }
 
-  getOr(query){
+  getOr (query) {
     let wheres = [];
     let data = [];
     for (let i = 0; i < query.length; i++) {
-        let key = Object.keys(query[i])[0];
-        let value = Object.values(query[i])[0];
-        let [ field, operator = 'eq' ] = key.split('!');
-        if(operator == 'like'){
-          value ='%'+value +'%';
-        }
-        data.push(value);
-        wheres.push(`${field} ${OPERATORS[operator]} ?`);
+      let key = Object.keys(query[i])[0];
+      let value = Object.values(query[i])[0];
+      let [ field, operator = 'eq' ] = key.split('!');
+      if (operator === 'like') {
+        value = '%' + value + '%';
+      }
+      data.push(value);
+      wheres.push(`${field} ${OPERATORS[operator]} ?`);
     }
-    return {where : `(${wheres.join(' OR ')})`,data:data };
+    return { where: `(${wheres.join(' OR ')})`, data: data };
   }
 
-  async getDb () {
+  getDb () {
     if (!this.openDB) {
-      this.openDB = SQLite.openDatabase(`${this.options.name}.db`, '1.0', this.options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error',error));
+      this.openDB = SQLite.openDatabase(`${this.options.name}.db`, '1.0', this.options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error', error));
     }
     return this.openDB;
   }

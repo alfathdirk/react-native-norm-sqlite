@@ -32,6 +32,7 @@ manager.runSession(async (session) => {
   let data = await session.factory('foo').all();
   //similiar with syntax: SELECT * FROM foo;
   let data = await session.factory('foo').find({ UserId: 1, 'UserName!like': 'foo' }).all();
+  // on example UserName separate by !, you can use 'or', 'lt', 'gt' , etc visit https://github.com/reekoheek/node-norm for more information
   //similiar with syntax: SELECT * FROM foo where UserId = 1 and UserName LIKE %foo%;
   let { inserted, rows } = await session.factory('foo').insert({ field1: 'bar', field2: 'baz' }).save();
                            await session.factory('foo').insert({ field1: 'bar', field2: 'baz' }).insert({ field1: 'bar1' }).save();
@@ -44,3 +45,4 @@ manager.runSession(async (session) => {
   console.log(data);
 });
 ```
+visit  [Node-Norm](https://github.com/reekoheek/node-norm) for more information

@@ -33,6 +33,14 @@ manager.runSession(async (session) => {
   //similiar with syntax: SELECT * FROM foo;
   let data = await session.factory('foo').find({ UserId: 1, 'UserName!like': 'foo' }).all();
   //similiar with syntax: SELECT * FROM foo where UserId = 1 and UserName LIKE %foo%;
+  let { inserted, rows } = await session.factory('foo').insert({ field1: 'bar', field2: 'baz' }).save();
+                           await session.factory('foo').insert({ field1: 'bar', field2: 'baz' }).insert({ field1: 'bar1' }).save();
+  
+  let { affected } = await session.factory('foo',{ barId = 2 }).set({ baz: 'bar' }).save();
+  // edit record on field barId = 2
+  
+  let data = await session.factory('foo').delete();
+  //delete data;
   console.log(data);
 });
 ```

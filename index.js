@@ -217,7 +217,6 @@ class Sqlite extends Connection{
   }
 
   async rawQuery (sql, params = []) {
-    // let conn = await this.getRaw();
     let result = await this.all(sql, params);
     return { result };
   }
@@ -279,12 +278,6 @@ class Sqlite extends Connection{
     this.openDB.close();
   }
 
-  // async getRaw () {
-  //   if (!this.openDB) {
-  //     this.openDB = SQLite.openDatabase(`${this.options.name}.db`, '1.0', this.options.appName, 200000, () => console.log('success open db'), (error) => console.log('db open error',error));
-  //   }
-  //   return this.openDB;
-  // }
 }
 
 module.exports = Sqlite;
